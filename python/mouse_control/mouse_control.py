@@ -31,6 +31,7 @@ class MouseControl(threading.Thread):
 
         # 设置摄像头分辨率
         self.cap = cv2.VideoCapture(source)         
+        self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter.fourcc('M', 'J', 'P', 'G'))
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, camera_shape[1])
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, camera_shape[0])
         self.cap.set(cv2.CAP_PROP_FPS, 30)
@@ -129,8 +130,8 @@ def main(opt):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Test detection and mouse control functions") 
     parser.add_argument("--source", type=int, default=0, help="file of videos, 0,1... for camera")
-    parser.add_argument("--width", type=int, default=640, help="camera width resolution")
-    parser.add_argument("--height", type=int, default=480, help="camera height resolution")
+    parser.add_argument("--width", type=int, default=1920, help="camera width resolution")
+    parser.add_argument("--height", type=int, default=1080, help="camera height resolution")
     parser.add_argument("--test", action="store_true", default=False, help="test mode")
 
     opt = parser.parse_args()

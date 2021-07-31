@@ -10,7 +10,7 @@ class Detector:
     """
     负责检测图片中激光点的位置坐标
     """
-    def __init__(self, source=0, screen_type=0, screen_resolution=(1080, 1920), camera_resolution=(480, 640)):
+    def __init__(self, source=0, screen_type=0, screen_resolution=(1080, 1920), camera_resolution=(1080, 1920)):
         """
         :param source: 输入源
         :param screen_type: 显示器的类型。0：投影仪 1：液晶显示器
@@ -18,6 +18,10 @@ class Detector:
         :param camera_resolution: 摄像头分辨率
         """
         self.cap = cv2.VideoCapture(source)
+        self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter.fourcc('M', 'J', 'P', 'G'))
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, camera_resolution[0])
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, camera_resolution[1])
+        
         self.screen_type = screen_type
         self.screen_resolution = screen_resolution
         self.save = [0, 0]  # 保存相机的CAP_PROP_AUTO_EXPOSURE和CAP_PROP_EXPOSURE参数
