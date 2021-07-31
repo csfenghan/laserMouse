@@ -17,27 +17,30 @@ class Detector:
         :param screen_resolution: 显示器分辨率
         :param camera_resolution: 摄像头分辨率
         """
-        self.cap = cv2.VideoCapture(source)
-        self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter.fourcc('M', 'J', 'P', 'G'))
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, camera_resolution[0])
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, camera_resolution[1])
-        
         self.screen_type = screen_type
         self.screen_resolution = screen_resolution
+        self.camera_resolution = camera_resolution
         self.save = [0, 0]  # 保存相机的CAP_PROP_AUTO_EXPOSURE和CAP_PROP_EXPOSURE参数
 
-    def set_camera(self):
+    def set_camera(self, cap):
         """
         根据显示器类型设置相机的参数(自动曝光、曝光时间)
         """
-        self.save[0] = self.cap.get(cv2.CAP_PROP_AUTO_EXPOSURE)
-        self.save[1] = self.cap.get(cv2.CAP_PROP_EXPOSURE)
+        # 设置数据格式（默认的YUV格式无法高帧率读取1080p数据）
+        cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter.fourcc('M', 'J', 'P', 'G'))
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.camera_resolution[0])
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.camera_resolution[1])
+        cap.set(cv2.CAP_PROP_FPS, 30)
 
-        self.cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 1)
+        self.save[0] = cap.get(cv2.CAP_PROP_AUTO_EXPOSURE)
+        self.save[1] = cap.get(cv2.CAP_PROP_EXPOSURE)
+
+        # 关闭自动曝光
+        cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 1)
         if self.screen_type == 0:
-            self.cap.set(cv2.CAP_PROP_EXPOSURE, 2)
+            cap.set(cv2.CAP_PROP_EXPOSURE, 0)
         elif self.screen_type == 1:
-            self.cap.set(cv2.CAP_PROP_EXPOSURE, 30)
+            cap.set(cv2.CAP_PROP_EXPOSURE, 30)
 
     def detect(self, img, conf=0.5):
         """
@@ -57,21 +60,21 @@ class Detector:
 
         coords = []
         if len(white_points[0]):
+            print('found obj')
             coords.append([int(np.mean(white_points[1])), int(np.mean(white_points[0]))])
-            return True, coords
-        else:
-            return False, coords
+        return img, coords
 
     def test(self):
         """
         测试模式
         """
+        cap = cv2.VideoCapture(0)
         # 设置摄像头曝光
-        self.set_camera()
+        self.set_camera(cap)
 
         cnt = 10
-        while self.cap.isOpened():
-            success, frame = self.cap.read()
+        while cap.isOpened():
+            success, frame = cap.read()
 
             # 处理错误情况
             if not success:
@@ -82,8 +85,9 @@ class Detector:
                     exit(0)
             
             # 检测
-            success, coords = self.detect(frame)
-            if success:
+            img, coords = self.detect(frame)
+            print(coords)
+            if len(coords):
                 cv2.circle(frame, center=(coords[0][0], coords[0][1]), radius=2, color=(0, 0, 255), thickness=-1)
 
             # 绘制结果

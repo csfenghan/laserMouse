@@ -7,13 +7,11 @@ import numpy as np
 import argparse
 
 class ChessBoardCalibrater:
-    def __init__(self, screen_size=(1080, 1920), is_test=False):
+    def __init__(self, screen_resolution=(1080, 1920)):
         """
-        :param screen_size:显示器的分辨率（宽*高）
-        :param is_test:开启测试功能
+        :param screen_resolution:显示器的分辨率（宽*高）
         """
-        self.screen_size = screen_size
-        self.is_test = is_test
+        self.screen_resolution = screen_resolution
         self.chessboard_size = (7, 5)  # 棋盘的角点个数(列 * 行)
         self.chessboard_points = None
         self.H = None
@@ -23,17 +21,24 @@ class ChessBoardCalibrater:
         将摄像头检测到的目标坐标映射成显示器的坐标
         :param coords:要映射的坐标，格式为[x, y]
         """
-        coords = np.array([[coords[0]], [coords[1]], [1]], np.float)
+        coords = np.array(coords, np.float).transpose()
+        print(coords)
+        coords = np.concatenate((coords, np.ones((1, coords.shape[1]))))  
+        print(coords)
         coords = self.H[0].dot(coords)
-        coords //= coords[2][0]
-        
-        return [coords[0][0], coords[1][0]]
+        print(coords)
+        coords = coords // coords[2]
+        print(coords)
+        coords = np.delete(coords, 2, axis=0)
+        print(coords)
+
+        return coords.transpose()
         
     def generatePattern(self):
         """
         生成大小为屏幕大小，棋盘内角点个数为self.chessboard_size的棋盘图片
         """
-        CheckerboardSize = min(self.screen_size) // 10
+        CheckerboardSize = min(self.screen_resolution) // 10
         Nx_cor, Ny_cor = self.chessboard_size
 
         black = np.zeros((CheckerboardSize, CheckerboardSize, 3), np.uint8)
@@ -70,15 +75,15 @@ class ChessBoardCalibrater:
 
         # 通过在四周padding将图片拼接为全屏幕大小
         curr_shape = black_white3.shape
-        pad_h = self.screen_size[0] - curr_shape[0]
-        pad_w = self.screen_size[1] - curr_shape[1]
+        pad_h = self.screen_resolution[0] - curr_shape[0]
+        pad_w = self.screen_resolution[1] - curr_shape[1]
 
         pad_top_bottom = np.zeros((pad_h // 2, curr_shape[1], 3), np.uint8)
         pad_top_bottom [:] = [255, 255, 255]
         result = np.concatenate([pad_top_bottom, black_white3], axis=0)
         result = np.concatenate([result, pad_top_bottom], axis=0)
 
-        pad_left_right = np.zeros((self.screen_size[0], pad_w // 2, 3), np.uint8)
+        pad_left_right = np.zeros((self.screen_resolution[0], pad_w // 2, 3), np.uint8)
         pad_left_right[:] = [255, 255, 255]
         result = np.concatenate([pad_left_right, result], axis=1)
         result = np.concatenate([result, pad_left_right], axis=1)
@@ -90,10 +95,7 @@ class ChessBoardCalibrater:
             exit(0)
      
         # 全屏显示
-        cv2.namedWindow("calibrate",cv2.WINDOW_NORMAL)
-        cv2.setWindowProperty("calibrate", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-        cv2.imshow("calibrate", result)
-        cv2.waitKey(100)
+        return result
 
     def detect_chess_board(self, img):
         """
@@ -111,69 +113,73 @@ class ChessBoardCalibrater:
         if type(cap) == cv2.VideoCapture:
             pass
         else:
+            print("set camera")
             cap = cv2.VideoCapture(cap)
-            cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
-            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+            cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter.fourcc('M', 'J', 'P', 'G'))
+            cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
         # 设置摄像头曝光度，使其可以检测到显示器上显示的棋盘(不同摄像头类型有着不同的参数)
         save = cap.get(cv2.CAP_PROP_EXPOSURE)
         cap.set(cv2.CAP_PROP_EXPOSURE, 30)
 
         # 在显示器上显示棋盘图片，摄像头捕获并显示器图片进行标定
-        self.generatePattern()
+        chessboard_img = self.generatePattern()
+
+        cv2.namedWindow("calibrate",cv2.WINDOW_NORMAL)
+        cv2.setWindowProperty("calibrate", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+        cv2.imshow("calibrate", chessboard_img)
+        cv2.waitKey(100)
 
         # 开始标定
         cnt = 0
         while cap.isOpened():
-
-            # 标定超时
             cnt += 1
-            if not self.is_test and cnt > 50:
+            # 标定超时
+            if cnt > 30:
                 break
 
-            success, frame = cap.read()
-            if not success:
-                print("cap.read() failed, retrying")
-                continue
-
             # 提取角点并计算单应矩阵
+            success, frame = cap.read()
             success, corners = self.detect_chess_board(frame)
-            if not success:
-                print("not found corners, retrying")
-                continue
-            self.H = cv2.findHomography(corners.squeeze() ,self.chessboard_points.squeeze()) 
-
-            # 在测试模式下显示标定效果
-            if self.is_test:
-                result = cv2.warpPerspective(frame, self.H[0], dsize=(self.screen_size[1], self.screen_size[0]))
-                cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
-                cv2.namedWindow("result", cv2.WINDOW_NORMAL)
-                cv2.imshow("frame", frame)
-                cv2.imshow("result", result)
-                cv2.waitKey(10)
-            else:
+            if success:
+                self.H = cv2.findHomography(corners.squeeze() ,self.chessboard_points.squeeze()) 
                 break
 
         # 处理结果
-        if cnt > 100:
+        if cnt > 30:
             print("Error: calibrate timeout!")
+            return False
         else:
             print('calibrate success, get param\nH = {}'.format(self.H[0]))
+            return True
 
         # 销毁窗口，恢复原先的摄像头参数
         cv2.destroyAllWindows()
         cap.set(cv2.CAP_PROP_EXPOSURE, save)
 
+    def test(self, source):
+        cap = cv2.VideoCapture(source)
+        if not self.calibrate(cap):
+            return
+
+        cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
+        while cap.isOpened():
+            success, frame = cap.read()
+            frame = cv2.warpPerspective(frame, self.H[0], dsize=(self.screen_resolution[1], self.screen_resolution[0]))
+            cv2.imshow("frame", frame)
+            cv2.waitKey(20)
+
 def main(opt):
-    calibrater = ChessBoardCalibrater(screen_size=(opt.height, opt.width) ,is_test=opt.test)
-    calibrater.calibrate(opt.source) 
+    calibrater = ChessBoardCalibrater(screen_resolution=(opt.height, opt.width))
+    calibrater.test(opt.source)
+    #calibrater.calibrate(opt.source)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Use a checkerboard grid to calibrate the position of the camera in relation to the monitor")
     parser.add_argument("--source", type=int, default=0, help="file of videos, 0,1... for camera")
     parser.add_argument("--width", type=int, default=1920, help="screen width resolution")
     parser.add_argument("--height", type=int, default=1080, help="screen height resolution")
-    parser.add_argument("--test", action="store_true",default=False, help="test mode")
 
     opt = parser.parse_args()
     main(opt)
