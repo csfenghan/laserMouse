@@ -1,5 +1,6 @@
 """
-
+已经废弃的方法，效果不是很好，误差较大，请使用chessboard_calibrate.py中的接口
+使用二维码定位的方式来定位显示器
 """
 import cv2
 import math
