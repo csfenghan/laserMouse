@@ -60,7 +60,6 @@ class Detector:
 
         coords = []
         if len(white_points[0]):
-            print('found obj')
             coords.append([int(np.mean(white_points[1])), int(np.mean(white_points[0]))])
         return img, coords
 
