@@ -39,6 +39,7 @@ class Calibrater {
 	int width_;		// 显示器宽度分辨率
 	int chessboard_cols_;	// 棋盘角点的列数
 	int chessboard_rows_;	// 棋盘角点的行数
+	cv::Mat H_;		// 映射矩阵
 };
 } // namespace lasermouse
 
