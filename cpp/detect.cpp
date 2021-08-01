@@ -76,4 +76,23 @@ std::vector<std::vector<int>> Detector::detect(cv::Mat img, double conf) {
     return result;
 }
 
+/* description: 功能测试
+* param:
+*     source: 使用的摄像头
+* */
+void Detector::test(int source) {
+    cv::VideoCapture cap = cv::VideoCapture(source);
+    cv::Mat frame;
+
+    setupCamera(cap);
+    while (cap.isOpened()) {
+        cap.read(frame);    
+        auto coords = detect(frame);
+        if (!coords.empty())
+            cv::circle(frame, cv::Point2d(coords[0][0], coords[0][1]), 5, cv::Scalar(255, 0, 0));
+        cv::imshow("frame", frame);
+        cv::waitKey(30);
+    } 
+    resumeCamera(cap);
+}
 }

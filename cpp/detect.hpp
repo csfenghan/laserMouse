@@ -38,6 +38,12 @@ class Detector {
      *     conf: 筛选目标用的置信度，conf越高，筛选越严格
      * */
     std::vector<std::vector<int>> detect(cv::Mat img, double conf = 0.5);
+
+    /* description: 功能测试
+     * param:
+     *     source: 使用的摄像头
+     * */
+    void test(int source);
   private:
     ScreenType screen_type_;    // 屏幕类型
     int screen_height_;
