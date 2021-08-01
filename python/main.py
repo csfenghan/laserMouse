@@ -5,13 +5,8 @@ from mouse_control.mouse_control import MouseControl
 
 # 接收命令，控制鼠标行为
 class LaserMouse:
-    def __init__(self, source=0, onnx_path="./yolov5s.onnx", 
-            inference_shape=(640, 640), camera_shape=(480, 640)):
+    def __init__(self)
         
-        self.lock = threading.Lock()
-        self.lock.acquire()
-        self.mouse = MouseControl(lock=self.lock, source=source, onnx_path=onnx_path, 
-                inference_shape=inference_shape, camera_shape=camera_shape)
         self.cmd_act = {
                 "C" : {"fun" : self.calibrate_cmd, "help" : "calibrate the camera"},
                 "P" : {"fun" : self.open_laser_cmd, "help": "start move mouse"},
