@@ -22,15 +22,10 @@ class ChessBoardCalibrater:
         :param coords:要映射的坐标，格式为[x, y]
         """
         coords = np.array(coords, np.float).transpose()
-        print(coords)
         coords = np.concatenate((coords, np.ones((1, coords.shape[1]))))  
-        print(coords)
         coords = self.H[0].dot(coords)
-        print(coords)
         coords = coords // coords[2]
-        print(coords)
         coords = np.delete(coords, 2, axis=0)
-        print(coords)
 
         return coords.transpose()
         
@@ -110,15 +105,6 @@ class ChessBoardCalibrater:
         打开摄像头，进行标定
         :param cap:传入的相机流。当外部程序调用此函数时，应当传入外部程序使用的摄像头流
         """
-        if type(cap) == cv2.VideoCapture:
-            pass
-        else:
-            print("set camera")
-            cap = cv2.VideoCapture(cap)
-            cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter.fourcc('M', 'J', 'P', 'G'))
-            cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-
         # 设置摄像头曝光度，使其可以检测到显示器上显示的棋盘(不同摄像头类型有着不同的参数)
         save = cap.get(cv2.CAP_PROP_EXPOSURE)
         cap.set(cv2.CAP_PROP_EXPOSURE, 30)
@@ -146,6 +132,10 @@ class ChessBoardCalibrater:
                 self.H = cv2.findHomography(corners.squeeze() ,self.chessboard_points.squeeze()) 
                 break
 
+        # 销毁窗口，恢复原先的摄像头参数
+        cv2.destroyAllWindows()
+        cap.set(cv2.CAP_PROP_EXPOSURE, save)
+
         # 处理结果
         if cnt > 30:
             print("Error: calibrate timeout!")
@@ -154,12 +144,13 @@ class ChessBoardCalibrater:
             print('calibrate success, get param\nH = {}'.format(self.H[0]))
             return True
 
-        # 销毁窗口，恢复原先的摄像头参数
-        cv2.destroyAllWindows()
-        cap.set(cv2.CAP_PROP_EXPOSURE, save)
 
     def test(self, source):
         cap = cv2.VideoCapture(source)
+        cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter.fourcc('M', 'J', 'P', 'G'))
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+
         if not self.calibrate(cap):
             return
 
@@ -173,7 +164,6 @@ class ChessBoardCalibrater:
 def main(opt):
     calibrater = ChessBoardCalibrater(screen_resolution=(opt.height, opt.width))
     calibrater.test(opt.source)
-    #calibrater.calibrate(opt.source)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Use a checkerboard grid to calibrate the position of the camera in relation to the monitor")
