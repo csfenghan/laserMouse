@@ -2,6 +2,7 @@
  * 本文件定义了屏幕标定算法的接口类
  * */
 #ifndef CALIBRATE_HPP
+#define CALIBRATE_HPP
 
 #include <opencv2/opencv.hpp>
 #include <vector>
