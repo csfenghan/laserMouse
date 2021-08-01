@@ -19,13 +19,13 @@ flags=[
     '-I',
     '/usr/local/include/',
     '-isystem',
-    '/usr/lib/gcc/x86_64-linux-gnu/8/include',
+    '/usr/lib/gcc/x86_64-linux-gnu/9/include',
     '-isystem',
     '/usr/include/x86_64-linux-gnu',
     '-isystem'
-    '/usr/include/c++/8',
+    '/usr/include/c++/9',
     '-isystem',
-    '/usr/include/c++/8/bits',
+    '/usr/include/c++/9/bits',
     ]
  
 SOURCE_EXTENSIONS = [ '.cpp', '.cxx', '.cc', '.c', ]
