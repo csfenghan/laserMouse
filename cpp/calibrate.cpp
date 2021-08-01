@@ -90,7 +90,7 @@ std::vector<std::vector<int>> Calibrater::coordsTransform(const std::vector<std:
     std::vector<std::vector<int>> result; 
 
     // 将输入转换成Mat数组
-    cv::Mat X = cv::Mat(3, coords.size(), CV_32FC1, cv::Scalar::all(0)); 
+    cv::Mat X = cv::Mat(3, coords.size(), CV_64FC1, cv::Scalar::all(0)); 
     for (size_t i = 0; i < coords.size(); i++) {
         for (size_t j= 0; j < coords[i].size(); j++) {
             X.at<float>(i, j) = coords[i][j];
@@ -103,8 +103,8 @@ std::vector<std::vector<int>> Calibrater::coordsTransform(const std::vector<std:
     // 将输出转换成vector
     for (int i = 0; i < Y.cols; i++) {
         std::vector<int> temp;
-        temp.push_back(int(Y.at<float>(0, i) / Y.at<float>(2, i)));
-        temp.push_back(int(Y.at<float>(1, i) / Y.at<float>(2, i)));
+        temp.push_back(int(Y.at<double>(0, i) / Y.at<double>(2, i)));
+        temp.push_back(int(Y.at<double>(1, i) / Y.at<double>(2, i)));
         result.push_back(temp);
     }
 
