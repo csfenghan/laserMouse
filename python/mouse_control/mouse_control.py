@@ -9,6 +9,7 @@ import cv2
 from calibrate.chessboard_calibrate import ChessBoardCalibrater
 from detect.threshold_detector import Detector
 from track.basic_tracker import Tracker
+from timeit import default_timer as timer
 import argparse
 import pyautogui
 
@@ -21,9 +22,8 @@ class mouseControl:
         :param camera_resolution: 摄像头分辨率
         """
         self.cap = cv2.VideoCapture(source)
-        self.calibrater = ChessBoardCalibrater(screen_resolution=screen_resolution)
-        self.detector = Detector(source, screen_type=screen_type, screen_resolution=screen_resolution, 
-                camera_resolution=camera_resolution)
+        self.calibrater = ChessBoardCalibrater(screen_resolution)
+        self.detector = Detector(source, screen_type, camera_resolution)
         self.tracker = Tracker(10)
 
         # 设置pyautogui
@@ -41,7 +41,10 @@ class mouseControl:
                 exit(0)
 
             # 检测并追踪
+            t1 = timer()
             coords = self.detector.detect(frame)
+            t2 = timer()
+            print("cost time {} ms".format((t2 - t1) * 1000))
             self.tracker.update(coords) 
             coords = self.tracker.position()
 
