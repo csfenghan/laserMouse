@@ -10,7 +10,7 @@ class Detector:
     """
     负责检测图片中激光点的位置坐标
     """
-    def __init__(self, source=0, screen_type=0, screen_resolution=(1080, 1920), camera_resolution=(1080, 1920)):
+    def __init__(self, screen_type=0, screen_resolution=(1080, 1920), camera_resolution=(1080, 1920)):
         """
         :param source: 输入源
         :param screen_type: 显示器的类型。0：投影仪 1：液晶显示器
@@ -61,42 +61,35 @@ class Detector:
         coords = []
         if len(white_points[0]):
             coords.append([int(np.mean(white_points[1])), int(np.mean(white_points[0]))])
-        return img, coords
+        return coords
 
-    def test(self):
+    def test(self, source):
         """
         测试模式
         """
-        cap = cv2.VideoCapture(0)
+        cap = cv2.VideoCapture(source)
         # 设置摄像头曝光
         self.set_camera(cap)
 
-        cnt = 10
         while cap.isOpened():
             success, frame = cap.read()
-
-            # 处理错误情况
             if not success:
-                print("camera read failed, retrying {} times".format(cnt))
-                cnt -= 1
-                if cnt <= 0:
-                    print("camera read faild, exited")
-                    exit(0)
+                print("camera read failed, exited")
+                exit(0)
             
             # 检测
-            img, coords = self.detect(frame)
-            print(coords)
+            coords = self.detect(frame)
             if len(coords):
                 cv2.circle(frame, center=(coords[0][0], coords[0][1]), radius=2, color=(0, 0, 255), thickness=-1)
 
             # 绘制结果
             cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
             cv2.imshow("frame", frame)
-            cv2.waitKey(1)
+            cv2.waitKey(10)
 
 def main(opt):
-    detector = Detector(source=opt.source, screen_type=opt.screen_type)
-    detector.test()
+    detector = Detector(screen_type=opt.screen_type)
+    detector.test(opt.source)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="detect the laser point")
