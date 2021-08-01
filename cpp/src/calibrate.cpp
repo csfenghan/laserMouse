@@ -99,7 +99,6 @@ std::vector<std::vector<int>> Calibrater::coordsTransform(const std::vector<std:
 
     // 坐标变换
     cv::Mat Y = H_ * X;
-    std::cout << cv::format(Y, cv::Formatter::FMT_NUMPY) << std::endl; 
 
     // 将输出转换成vector
     for (int i = 0; i < Y.cols; i++) {
