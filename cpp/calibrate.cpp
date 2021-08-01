@@ -3,7 +3,8 @@
 
 namespace lasermouse{
 Calibrater::Calibrater(int height, int width, int chessboard_cols, int chessboard_rows):
-    height_(height), width_(width), chessboard_cols_(chessboard_cols), chessboard_rows_(chessboard_rows) {}
+    height_(height), width_(width), chessboard_cols_(chessboard_cols), chessboard_rows_(chessboard_rows),
+    auto_exposure_(3), exposure_(30) {}
 
 /* description: 根据当前显示器的大小产生一个棋盘图片
  * */
@@ -75,6 +76,8 @@ bool Calibrater::calibrate(cv::VideoCapture &cap) {
         return false;
     }
     cv::destroyWindow("calibrate");
+    std::cout << "calibrate successed" << std::endl;
+    std::cout << "H = " << cv::format(H_, cv::Formatter::FMT_NUMPY) << std::endl;
     return true;
 }
 
@@ -108,4 +111,39 @@ std::vector<std::vector<int>> Calibrater::coordsTransform(const std::vector<std:
     return result;
 }
 
+/* description: 设置、恢复摄像头配置
+* */
+void Calibrater::setupCamera(cv::VideoCapture &cap) {
+    auto_exposure_ = cap.get(cv::CAP_PROP_AUTO_EXPOSURE);    
+    exposure_ = cap.get(cv::CAP_PROP_EXPOSURE);    
+
+    cap.set(cv::CAP_PROP_AUTO_EXPOSURE, 1);
+    cap.set(cv::CAP_PROP_EXPOSURE, 30);
+}
+void Calibrater::resumeCamera(cv::VideoCapture &cap) {
+    cap.set(cv::CAP_PROP_AUTO_EXPOSURE, auto_exposure_);
+    cap.set(cv::CAP_PROP_EXPOSURE, exposure_);
+}
+/* description: 功能测试
+* param:
+*     source: 使用的摄像头
+* */
+void Calibrater::test(int source) {
+    auto cap = cv::VideoCapture(source);
+    cv::Mat frame;
+
+    setupCamera(cap);
+    if (!calibrate(cap)) 
+        return;
+
+    cv::namedWindow("frame", cv::WINDOW_NORMAL);
+    cv::resizeWindow("frame", 500, 500);
+    while (cap.isOpened()) {
+        cap.read(frame);
+        cv::warpPerspective(frame, frame, H_, cv::Size(width_, height_));
+        cv::imshow("frame", frame);
+        cv::waitKey(20);
+    }
+    resumeCamera(cap);
+}
 }

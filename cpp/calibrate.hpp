@@ -17,6 +17,11 @@ class Calibrater {
      * */
     explicit Calibrater(int height, int width, int chessboard_cols_ = 7, int chessboard_rows_ = 5);
 
+    /* description: 设置、恢复摄像头配置
+     * */
+    void setupCamera(cv::VideoCapture &cap);
+    void resumeCamera(cv::VideoCapture &cap);
+
     /* description: 标定当前屏幕与相机的位置
      * param 
      *     cap: 传入当前相机的视频流
@@ -35,12 +40,21 @@ class Calibrater {
      * */
     cv::Mat createChessboard();
 
+    /* description: 功能测试
+     * param:
+     *     source: 使用的摄像头
+     * */
+    void test(int source);
+
   private:
     int height_;    // 显示器高度分辨率
     int width_;     // 显示器宽度分辨率
     int chessboard_cols_;   // 棋盘角点的列数
     int chessboard_rows_;   // 棋盘角点的行数
     cv::Mat H_;     // 映射矩阵
+
+    int auto_exposure_;
+    int exposure_;
 };
 } // namespace lasermouse
 
