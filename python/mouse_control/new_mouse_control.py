@@ -30,8 +30,8 @@ class mouseControl:
         pyautogui.PAUSE = 0.001
         
     def run(self):
-        self.calibrater.calibrate(self.cap) # 标定
         self.detector.set_camera(self.cap)  # 检测前设置相机
+        self.calibrater.calibrate(self.cap) # 标定
 
         # 摄像头刚刚打开时读取会有些问题，因此等待延迟一段时间
         for i in range(10):
@@ -45,16 +45,17 @@ class mouseControl:
             img, coords = self.detector.detect(frame)
             self.tracker.update(coords) 
             coords = self.tracker.position()
-            print(coords)
 
             # 检测到目标时，控制鼠标
             if len(coords):
                 screen_coords = self.calibrater.reflect_to_screen_coords(coords) 
-                pyautogui.moveTo(coords[0][0], coords[0][1])
+                pyautogui.moveTo(screen_coords[0][0], screen_coords[0][1])
                 frame = cv2.circle(frame, (coords[0][0], coords[0][1]), radius=5, color=(0, 0, 255))
-            #cv2.imshow("frame", frame)
-            #cv2.imshow("img", img)
-            #cv2.waitKey(30)
+            result = self.calibrater.warp(frame)
+            cv2.imshow("img", frame)
+            cv2.imshow("result", result)
+            
+            cv2.waitKey(30)
 
 def main():
     controller = mouseControl(camera_resolution=(480,640))
