@@ -14,5 +14,6 @@ message(STATUS "    include path: ${OpenCV_INCLUDE_DIRS}")
 add_executable(laserMouse ./main.cpp 
                             ./calibrate.cpp
                             ./detect.cpp
-                            ./mouse_control.cpp)
+                            ./mouse_control.cpp
+                            ./location.cpp)
 target_link_libraries(laserMouse ${OpenCV_LIBS} ${X11_LIBRARIES})
