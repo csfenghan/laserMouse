@@ -144,6 +144,9 @@ class ChessBoardCalibrater:
             print('calibrate success, get param\nH = {}'.format(self.H[0]))
             return True
 
+    def warp(self, frame):
+        frame = cv2.warpPerspective(frame, self.H[0], dsize=(self.screen_resolution[1], self.screen_resolution[0]))
+        return frame
 
     def test(self, source):
         cap = cv2.VideoCapture(source)
