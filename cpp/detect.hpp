@@ -13,7 +13,7 @@ enum ScreenType {
 };
 
 class Detector {
-  public:
+ public:
     /*
      * param:
      *     screen_type: 显示器的类型,PROJECTOR:投影仪   LCD:lcd显示器
@@ -25,11 +25,12 @@ class Detector {
     Detector(ScreenType screen_type = PROJECTOR, int screen_height = 1080, int screen_width = 1920,
             int camera_height = 480, int camera_width = 640);
 
-    /* description: 设置相机分辨率、曝光、fps
+    /* description: 设置、恢复相机分辨率、曝光、fps
      * param:
      *     cap: 相机的视频流
      * */
     void setupCamera(cv::VideoCapture &cap);
+    void resumeCamera(cv::VideoCapture &cap);
 
     /* description: 检测图片中激光点的坐标
      * param:
@@ -43,6 +44,10 @@ class Detector {
     int screen_width_;
     int camera_height_;
     int camera_width_;
+
+    // 保存的相机参数
+    int auto_exposure_;
+    int exposure_;
 };
 } // namespace lasermouse
 
