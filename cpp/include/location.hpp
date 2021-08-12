@@ -2,6 +2,7 @@
 #define LOCATION_HPP
 
 #include <opencv2/opencv.hpp>
+#include <pthread.h>
 #include "calibrate.hpp"
 #include "detect.hpp"
 
@@ -25,6 +26,7 @@ class Location {
       bool position(int &x, int &y);
 
   private:
+      pthread_mutex_t lock_;
       cv::VideoCapture cap_;
       Calibrater calibrater_;
       Detector detector_;
