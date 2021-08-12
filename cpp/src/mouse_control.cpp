@@ -15,6 +15,8 @@ void MouseControl::init() {
         exit(-1);
     }
     root = DefaultRootWindow(display);
+
+    pthread_mutex_init(&lock_, NULL); 
 }
 
 /* description: 设置当前鼠标的坐标
@@ -23,8 +25,10 @@ void MouseControl::init() {
 *     y: 设置的y坐标
 * */
 void MouseControl::moveTo(int x, int y) {
+    pthread_mutex_lock(&lock_);
     XWarpPointer(display, None, root, 0, 0, 0, 0, x, y);
     XFlush(display);
+    pthread_mutex_unlock(&lock_);
 }
 
 /* description: 获取当前鼠标的坐标
@@ -35,7 +39,9 @@ void MouseControl::moveTo(int x, int y) {
 void MouseControl::position(int &x, int &y) {
     int  tmp;unsigned  int  tmp2;
     Window fromroot, tmpwin;
+    pthread_mutex_lock(&lock_);
     XQueryPointer(display, root, &fromroot, &tmpwin, &x, &y, &tmp, &tmp, &tmp2);
+    pthread_mutex_unlock(&lock_);
 }
 
 }
