@@ -39,9 +39,22 @@ void MouseControl::moveTo(int x, int y) {
 void MouseControl::position(int &x, int &y) {
     int  tmp;unsigned  int  tmp2;
     Window fromroot, tmpwin;
+
     pthread_mutex_lock(&lock_);
     XQueryPointer(display, root, &fromroot, &tmpwin, &x, &y, &tmp, &tmp, &tmp2);
     pthread_mutex_unlock(&lock_);
 }
+/* description:点击左键
+* */
+void MouseControl::clickLeft() {
+
+}
+
+/* description:点击右键
+* */
+void MouseControl::clickRight() {
+
+}
+
 
 }

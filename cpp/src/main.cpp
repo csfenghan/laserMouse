@@ -26,15 +26,13 @@ void detect_and_control(int arg) {
 }
 
 int main(int argc, char **argv) {
-    if (argc != 2) {
-        fprintf(stderr, "usage: %s /dev/serial", argv[0]);
-        exit(0);
-    }
-
     int fd;
     char buf[1];
 
-    fd = open(argv[1], O_RDONLY);
+    if (argc == 2)
+        fd = open(argv[1], O_RDONLY);
+    else
+        fd = dup(STDIN_FILENO);
     pthread_mutex_lock(&run_lock);
 
     // 命令：
