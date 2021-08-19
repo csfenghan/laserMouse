@@ -15,7 +15,7 @@ class Calibrater {
      *     height: 显示器的高度分辨率
      *     width: 显示器的宽度分辨率
      * */
-    explicit Calibrater(int height, int width, int chessboard_cols_ = 7, int chessboard_rows_ = 5);
+    explicit Calibrater(int height, int width, int chessboard_cols_ = 13, int chessboard_rows_ = 4);
 
     /* description: 设置、恢复摄像头配置
      * */
@@ -39,6 +39,10 @@ class Calibrater {
     /* description: 根据当前显示器的大小产生一个棋盘图片
      * */
     cv::Mat createChessboard();
+
+    /*description: 生成圆形标定板
+     * */
+    cv::Mat createCicleGrid();
 
     /* description: 功能测试
      * param:
