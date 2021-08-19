@@ -8,11 +8,12 @@
 - Ubuntu20.04    
 - 当贝F3投影仪
 - 摄像头使用的普通480\*640,USB摄像头
-- 一个基于STM32的自制遥控器
+- 一支红色激光笔
 
 ## 硬件准备
 - 一个可以软件设置曝光时间的USB摄像头
-- 一个亮度较高的红色激光笔(也可以自己制作遥控器，本项目的遥控器通过串口进行通讯)
+- 一个任意颜色的激光笔  
+ps:如果只是测试其控制鼠标的基本功能，则只需要一个激光笔即可。如果要自制遥控器，则只需要按照指令列表发送相应命令即可
 
 ## 软件准备
 - Linux任意发行版
@@ -21,24 +22,24 @@
 ## 使用  
 首先下载源代码    
 
-    $ git clone git@github.com:csfenghan/laserMouse.git    
+    $ git clone https://github.com/csfenghan/laserMouse.git
     $ cd laserMouse
 
 然后将接入摄像头，使摄像头可以拍摄到投影仪画面（显示器）的全貌，曝光清晰
 实现分为C++和Python两个版本，Python为实验版本，C++为最终版本
 
 ### C++
-C++版本使用OpenCV实现，进入目录后编译完成后运行即可
+C++版本实现了鼠标控制的全部功能，依赖OpenCV和X11实现，进入目录后编译完成后运行即可
 
     $ cd cpp
     $ mkdir build && cd build
     $ cmake ..
     $ make
     $ ./laserMouse
-运行后，使用激光笔照射屏幕，鼠标可以准确的跟随激光笔移动
+运行后，使用激光笔照射屏幕，鼠标可以准确的跟随激光笔移动。如果没有遥控器但想要模仿鼠标的行为，可以使用键盘模仿来自遥控器的信号（具体用法程序运行后有相应的help提示）
 
 ### Python
-Python版本的功能并不稳定，主要是用来测试一些功能
+Python版本的功能并不稳定也不完善，主要是用来测试一些功能
 
     $ cd laser_mouse/python
     $ pip install -r requirements.txt
