@@ -5,6 +5,10 @@ namespace lasermouse {
 Location::Location(int source):calibrater_(1080, 1920), detector_(){
     pthread_mutex_init(&lock_, NULL);
     cap_.open(source);
+    if (!cap_.isOpened()) {
+        std::cerr << "failed to open camera" << std::endl;
+        exit(-1);
+    }
     detector_.setupCamera(cap_); 
 }
 /* description: 标定当前位置
