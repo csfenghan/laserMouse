@@ -3,3 +3,4 @@
 *.onnx
 *.pt
 *.swp*
+*.vscode*
