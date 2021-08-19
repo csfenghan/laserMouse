@@ -62,7 +62,7 @@ bool Calibrater::calibrate(cv::VideoCapture &cap) {
             break;
         if (cap.read(frame) == false)
             break;
-        
+
         // 检测角点并匹配
         cv::findChessboardCorners(chessboard, cv::Size(chessboard_cols_, chessboard_rows_), corners_show);
         if (cv::findChessboardCorners(frame, cv::Size(chessboard_cols_, chessboard_rows_), corners_detect)) {
@@ -71,11 +71,11 @@ bool Calibrater::calibrate(cv::VideoCapture &cap) {
         }
     }
 
+    cv::destroyWindow("calibrate");
     if (H_.empty() && times <= 0) {
         std::cerr << "calibrate failed, timeout!" << std::endl;
         return false;
     }
-    cv::destroyWindow("calibrate");
     std::cout << "calibrate successed" << std::endl;
     std::cout << "H = " << cv::format(H_, cv::Formatter::FMT_NUMPY) << std::endl;
     return true;
