@@ -5,7 +5,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-lasermouse::Location location(2);    
+/*lasermouse::Location location(2);    
 lasermouse::MouseControl mouse_control;
 pthread_mutex_t run_lock = PTHREAD_MUTEX_INITIALIZER;   // 通过这个互斥量控制检测线程
 void *detect_and_control(void *);
@@ -62,3 +62,8 @@ void *detect_and_control(void *arg) {
     }
 }
 
+*/
+int main() {
+    lasermouse::Calibrater Calibrater(1080, 1920);
+    Calibrater.test(2);
+}
