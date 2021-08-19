@@ -52,7 +52,6 @@ cv::Mat Calibrater::createCicleGrid() {
     int row = row_start + n_pix;
     for (int i = 0; i < 2 * chessboard_rows_; i++) {
         int col = col_start + n_pix;
-        printf("%d, %d\n",col, row);
         for (int j = 0; j < chessboard_cols_; j++) {
             if ((i & 0x01) == 0){   // 如果是偶数行
                 if ((j & 0x01) != 0)
