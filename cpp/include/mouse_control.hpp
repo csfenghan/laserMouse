@@ -5,6 +5,7 @@
 
 #else
 #include <X11/Xlib.h>
+#include <pthread.h>
 #endif
 
 namespace lasermouse {
@@ -25,11 +26,21 @@ class MouseControl {
        *     y: 返回y坐标
        * */
       void position(int &x, int &y); 
+
+      /* description:点击左键
+       * */
+      void clickLeft();
+
+      /* description:点击右键
+       * */
+      void clickRight();
+
   private:
       /* description: x窗口初始化
        * */
       void init(); 
 
+      pthread_mutex_t lock_;
       Display *display;
       Window root;
 };

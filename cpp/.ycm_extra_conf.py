@@ -26,6 +26,8 @@ flags=[
     '/usr/include/c++/9',
     '-isystem',
     '/usr/include/c++/9/bits',
+    '-isystem',
+    './include',
     ]
  
 SOURCE_EXTENSIONS = [ '.cpp', '.cxx', '.cc', '.c', ]

@@ -35,6 +35,38 @@ cv::Mat Calibrater::createChessboard() {
     return result;
 }
 
+/*
+ * description: 生成圆形标定板
+ * */
+cv::Mat Calibrater::createCicleGrid() {
+    int n_pix = MIN(height_, width_) / 10;  // 一个块的像素数
+    int pad_h = height_ - n_pix * (2 * chessboard_rows_+ 1);    
+    int pad_w = width_ - n_pix * (chessboard_cols_+ 1);
+    int radius = n_pix / 3;
+
+    int row_start = pad_h / 2; 
+    int col_start = pad_w / 2;
+
+    // 在中心位置创建棋盘图片
+    cv::Mat result = cv::Mat(height_, width_, CV_8UC1, cv::Scalar::all(255));
+    int row = row_start + n_pix;
+    for (int i = 0; i < 2 * chessboard_rows_; i++) {
+        int col = col_start + n_pix;
+        for (int j = 0; j < chessboard_cols_; j++) {
+            if ((i & 0x01) == 0){   // 如果是偶数行
+                if ((j & 0x01) != 0)
+                    cv::circle(result, cv::Point(col, row), radius, cv::Scalar(0), -1);
+            } else {
+                if ((j & 0x01) == 0) 
+                    cv::circle(result, cv::Point(col, row), radius, cv::Scalar(0), -1);
+            }
+            col += n_pix;
+        }
+        row += n_pix;
+    }
+    return result;
+}
+
 /* description: 标定当前屏幕与相机的位置
 * param 
 *     cap: 传入当前相机的视频流
@@ -46,11 +78,11 @@ bool Calibrater::calibrate(cv::VideoCapture &cap) {
         return false;
     }
     // 全屏显示图片
-    cv::Mat chessboard = createChessboard();
+    cv::Mat grid_show= createCicleGrid();
 
     cv::namedWindow("calibrate", cv::WINDOW_NORMAL);
     cv::setWindowProperty("calibrate", cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
-    cv::imshow("calibrate", chessboard);
+    cv::imshow("calibrate", grid_show);
     cv::waitKey(100);
 
     // 开始标定
@@ -62,20 +94,24 @@ bool Calibrater::calibrate(cv::VideoCapture &cap) {
             break;
         if (cap.read(frame) == false)
             break;
-        
+
         // 检测角点并匹配
-        cv::findChessboardCorners(chessboard, cv::Size(chessboard_cols_, chessboard_rows_), corners_show);
-        if (cv::findChessboardCorners(frame, cv::Size(chessboard_cols_, chessboard_rows_), corners_detect)) {
+        if (!cv::findCirclesGrid(grid_show, cv::Size(chessboard_rows_, chessboard_cols_), 
+                    corners_show, cv::CALIB_CB_ASYMMETRIC_GRID)) {
+            printf("detect failed\n");
+        }
+        if (cv::findCirclesGrid(frame, cv::Size(chessboard_rows_, chessboard_cols_), 
+                    corners_detect, cv::CALIB_CB_ASYMMETRIC_GRID)) {
             H_ = cv::findHomography(corners_detect, corners_show);
             break;
         }
     }
 
+    cv::destroyWindow("calibrate");
     if (H_.empty() && times <= 0) {
         std::cerr << "calibrate failed, timeout!" << std::endl;
         return false;
     }
-    cv::destroyWindow("calibrate");
     std::cout << "calibrate successed" << std::endl;
     std::cout << "H = " << cv::format(H_, cv::Formatter::FMT_NUMPY) << std::endl;
     return true;
