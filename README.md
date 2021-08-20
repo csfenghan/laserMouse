@@ -18,8 +18,13 @@ ps:如果只是测试其控制鼠标的基本功能，则只需要一个激光�
 ## 软件准备
 - Linux任意发行版
 - OpenCV4.0以上版本
+- jsoncpp库
 
 ## 使用  
+安装jsoncpp库  
+
+    $ sudo apt install libjsoncpp-dev
+
 首先下载源代码    
 
     $ git clone https://github.com/csfenghan/laserMouse.git
