@@ -8,12 +8,12 @@
 lasermouse::Location location(2);    
 lasermouse::MouseControl mouse_control;
 pthread_mutex_t run_lock = PTHREAD_MUTEX_INITIALIZER;   // 通过这个互斥量控制检测线程
-void *detect_and_control(void *);
 
 int main(int argc, char **argv) {
     int fd;
     char buf[1];
     pthread_t pd;
+    void *detect_and_control(void *);
 
     if (argc == 2)
         fd = open(argv[1], O_RDONLY);
@@ -42,8 +42,13 @@ int main(int argc, char **argv) {
         } else if (buf[0] == 'r') {
             mouse_control.clickRight();
         } else {
-            
         }
+        printf("command:\n"
+                "\rc:标定\n"
+                "\rs:开始检测\n"
+                "\rS:停止检测\n"
+                "\rl:点击左键\n"
+                "\rr:点击右键\n");
     }
 }
 
