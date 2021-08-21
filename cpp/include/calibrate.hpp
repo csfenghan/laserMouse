@@ -6,6 +6,7 @@
 
 #include <opencv2/opencv.hpp>
 #include <vector>
+#include <pthread.h>
 #include "config.hpp"
 
 namespace lasermouse {
@@ -63,7 +64,6 @@ private:
      * */
     cv::Mat createCicleGrid();
 
-
     int screen_height_;    // 显示器高度分辨率
     int screen_width_;     // 显示器宽度分辨率
     int grid_cols_;   // 棋盘角点的列数
@@ -72,6 +72,8 @@ private:
 
     int auto_exposure_; // 相机自动曝光参数
     int exposure_;      // 相机曝光参数
+
+    pthread_mutex_t mutex_;
 };
 } // namespace lasermouse
 

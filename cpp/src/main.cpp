@@ -9,7 +9,6 @@
 
 lasermouse::Location location;          // 激光点定位
 lasermouse::MouseControl mouse_control; // 鼠标控制
-lasermouse::Communication comm;
 
 pthread_mutex_t run_lock;               // 通过这个互斥量控制检测线程
 void *detect_and_control(void *);
@@ -23,7 +22,8 @@ int main(int argc, char **argv) {
         exit(0);
     }
     // 初始化
-    lasermouse::Config config;
+    lasermouse::Config config;      // 读取配置文件
+    lasermouse::Communication comm; // 读取命令
 
     config.open(argv[1]);
     location.setupConfig(config);

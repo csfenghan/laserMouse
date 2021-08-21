@@ -9,18 +9,22 @@ namespace lasermouse{
 * */
 Calibrater::Calibrater(int screen_height, int screen_width, int grid_cols, int grid_rows):
     screen_height_(screen_height), screen_width_(screen_width), grid_cols_(grid_cols), grid_rows_(grid_rows),
-    auto_exposure_(3), exposure_(30) {}
+    auto_exposure_(3), exposure_(30), mutex_(PTHREAD_MUTEX_INITIALIZER) {}
 
 Calibrater::Calibrater():screen_height_(-1), screen_width_(-1), grid_cols_(-1), grid_rows_(-1), 
-                    auto_exposure_(3), exposure_(30) {}
+                    auto_exposure_(3), exposure_(30), mutex_(PTHREAD_MUTEX_INITIALIZER) {}
 
 /* description: 使用配置类Config配置标定信息
 * */
 void Calibrater::setupConfig(const Config &conf) {
+    pthread_mutex_lock(&mutex_);
+
     screen_width_ = conf.screen_width;
     screen_height_ = conf.screen_height;
     grid_rows_ = conf.grid_rows;
     grid_cols_ = conf.grid_cols;
+
+    pthread_mutex_unlock(&mutex_);
 }
 
 /* description: 根据当前显示器的大小产生一个棋盘图片
@@ -121,7 +125,9 @@ bool Calibrater::calibrate(cv::VideoCapture &cap) {
         }
         if (cv::findCirclesGrid(frame, cv::Size(grid_rows_, grid_cols_), 
                     corners_detect, cv::CALIB_CB_ASYMMETRIC_GRID)) {
+            pthread_mutex_lock(&mutex_);
             H_ = cv::findHomography(corners_detect, corners_show);
+            pthread_mutex_unlock(&mutex_);
             break;
         }
     }
@@ -154,7 +160,9 @@ std::vector<std::vector<int>> Calibrater::coordsTransform(const std::vector<std:
     }
 
     // 坐标变换
+    pthread_mutex_lock(&mutex_);
     cv::Mat Y = H_ * X;
+    pthread_mutex_unlock(&mutex_);
 
     // 将输出转换成vector
     for (int i = 0; i < Y.cols; i++) {
