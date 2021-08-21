@@ -18,4 +18,4 @@ add_executable(laserMouse src/main.cpp
                             src/detect.cpp
                             src/mouse_control.cpp
                             src/location.cpp)
-target_link_libraries(laserMouse ${OpenCV_LIBS} ${X11_LIBRARIES} pthread)
+target_link_libraries(laserMouse ${OpenCV_LIBS} ${X11_LIBRARIES} pthread jsoncpp)
