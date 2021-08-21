@@ -4,16 +4,35 @@
 namespace lasermouse{
 /*
 * param:
-*     screen_type: 显示器的类型,projector:投影仪   lcd:lcd显示器
 *     screen_height: 屏幕高度分辨率
 *     screen_width: 屏幕宽度分辨率
 *     camera_height: 摄像头高度分辨率
 *     camera_width: 摄像头宽度分辨率
 * */
-Detector::Detector(ScreenType screen_type, int screen_height, int screen_width,
-        int camera_height, int camera_width):screen_type_(screen_type), screen_height_(screen_height),
+Detector::Detector(int screen_height, int screen_width,
+        int camera_height, int camera_width):screen_height_(screen_height),
         screen_width_(screen_width), camera_height_(camera_height), camera_width_(camera_width), 
         auto_exposure_(3), exposure_(30){}
+Detector::Detector():screen_height_(-1), screen_width_(-1), camera_height_(-1), camera_width_(-1),
+        auto_exposure_(3), exposure_(30) {}
+/*
+* param:
+*    conf:配置类
+* */
+Detector::Detector(const Config &conf) {
+    setupConfig(conf);
+}
+
+/*
+* param:
+*    conf:配置类
+* */
+void Detector::setupConfig(const Config &conf) {
+    camera_height_ = conf.camera_height;
+    camera_width_ = conf.camera_width;
+    screen_height_ = conf.screen_height;
+    screen_width_ = conf.screen_width;
+}
 
 /* description: 设置相机分辨率、曝光、fps
 * param:
@@ -29,16 +48,7 @@ void Detector::setupCamera(cv::VideoCapture &cap) {
     cap.set(cv::CAP_PROP_FPS, 30);
     cap.set(cv::CAP_PROP_AUTO_EXPOSURE, 1);
     
-    switch (screen_type_) {
-        case PROJECTOR:
-            cap.set(cv::CAP_PROP_EXPOSURE, 1);
-            break;
-        case LCD:
-            cap.set(cv::CAP_PROP_EXPOSURE, 30);
-            break; 
-        default:
-            std::cerr << "unknow screen type: " << screen_type_ << std::endl;
-    }
+    cap.set(cv::CAP_PROP_EXPOSURE, 1);
 }
 
 void Detector::resumeCamera(cv::VideoCapture &cap) {

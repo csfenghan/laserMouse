@@ -4,21 +4,24 @@
 #include <iostream>
 #include <fcntl.h>
 #include <unistd.h>
+#include <jsoncpp/json/json.h>
 
 lasermouse::Location location(2);    
 lasermouse::MouseControl mouse_control;
 pthread_mutex_t run_lock = PTHREAD_MUTEX_INITIALIZER;   // 通过这个互斥量控制检测线程
 
+void *detect_and_control(void *);
+
 int main(int argc, char **argv) {
     int fd;
     char buf[1];
     pthread_t pd;
-    void *detect_and_control(void *);
+    Json::Value root;
 
-    if (argc == 2)
-        fd = open(argv[1], O_RDONLY);
-    else
-        fd = dup(STDIN_FILENO);
+    if (argc != 2) {
+        fprintf(stderr, "usage: %s <config.json>", argv[0]);
+        exit(0);
+    }
 
     // 初始化时持有锁，即默认检测线程阻塞
     pthread_mutex_lock(&run_lock);

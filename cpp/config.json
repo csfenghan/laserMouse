@@ -1,0 +1,18 @@
+{
+    "camera" : {
+        "source" : 0,
+        "width" : 640,
+        "height" : 480
+    },
+    "screen" : {
+        "width" : 1920,
+        "height" : 1080
+    },
+    "remoteControl" : {
+        "source" : null
+    },
+    "other" : {
+        "grid_rows" : 4,
+        "grid_cols" : 13
+    }
+}

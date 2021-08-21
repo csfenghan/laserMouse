@@ -3,27 +3,29 @@
 
 #include <opencv2/opencv.hpp>
 #include <vector>
+#include "config.hpp"
 
 namespace lasermouse {
-
-// 显示器的种类
-enum ScreenType {
-    PROJECTOR = 1,  // 投影仪
-    LCD = 2         // lcd显示器
-};
 
 class Detector {
  public:
     /*
      * param:
-     *     screen_type: 显示器的类型,PROJECTOR:投影仪   LCD:lcd显示器
      *     screen_height: 屏幕高度分辨率
      *     screen_width: 屏幕宽度分辨率
      *     camera_height: 摄像头高度分辨率
      *     camera_width: 摄像头宽度分辨率
      * */
-    Detector(ScreenType screen_type = PROJECTOR, int screen_height = 1080, int screen_width = 1920,
-            int camera_height = 480, int camera_width = 640);
+    Detector(int screen_height, int screen_width,
+            int camera_height, int camera_width);
+    Detector();
+    explicit Detector(const Config &conf);
+
+    /*
+     * param:
+     *    conf:配置类
+     * */
+    void setupConfig(const Config &conf);
 
     /* description: 设置、恢复相机分辨率、曝光、fps
      * param:
@@ -45,7 +47,6 @@ class Detector {
      * */
     void test(int source);
   private:
-    ScreenType screen_type_;    // 屏幕类型
     int screen_height_;
     int screen_width_;
     int camera_height_;

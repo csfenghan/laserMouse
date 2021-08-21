@@ -2,23 +2,35 @@
 #include <iostream>
 
 namespace lasermouse {
-Location::Location(int source):calibrater_(1080, 1920), detector_(){
+
+Location::Location(int source){}
+
+/* description:配置参数
+* */
+void Location::setupConfig(const Config& conf) {
+    camera_source_ = conf.camera_source;
+    calibrater_.setupConfig(conf);
+    detector_.setupConfig(conf);
+}
+
+/* description:初始化
+ * */
+void Location::init() {
     pthread_mutex_init(&lock_, NULL);
-    cap_.open(source);
+    cap_.open(camera_source_);
     if (!cap_.isOpened()) {
         std::cerr << "failed to open camera" << std::endl;
         exit(-1);
     }
     detector_.setupCamera(cap_); 
 }
+
 /* description: 标定当前位置
 * */
 void Location::calibrate() {
     pthread_mutex_lock(&lock_);
 
-    calibrater_.setupCamera(cap_);
     calibrater_.calibrate(cap_);
-    calibrater_.resumeCamera(cap_);
 
     pthread_mutex_unlock(&lock_);
 }
