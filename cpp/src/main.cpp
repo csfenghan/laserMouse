@@ -4,54 +4,59 @@
 #include <iostream>
 #include <fcntl.h>
 #include <unistd.h>
-#include <jsoncpp/json/json.h>
+#include "config.hpp"
+#include "communication.hpp"
 
-lasermouse::Location location(2);    
-lasermouse::MouseControl mouse_control;
-pthread_mutex_t run_lock = PTHREAD_MUTEX_INITIALIZER;   // 通过这个互斥量控制检测线程
+lasermouse::Location location;          // 激光点定位
+lasermouse::MouseControl mouse_control; // 鼠标控制
+lasermouse::Communication comm;
 
+pthread_mutex_t run_lock;               // 通过这个互斥量控制检测线程
 void *detect_and_control(void *);
 
 int main(int argc, char **argv) {
-    int fd;
-    char buf[1];
     pthread_t pd;
-    Json::Value root;
+    bool is_run = false;
 
     if (argc != 2) {
         fprintf(stderr, "usage: %s <config.json>", argv[0]);
         exit(0);
     }
+    // 初始化
+    lasermouse::Config config;
+
+    config.open(argv[1]);
+    location.setupConfig(config);
+    location.init();
+    comm.setupConfig(config);
+    comm.init();
 
     // 初始化时持有锁，即默认检测线程阻塞
     pthread_mutex_lock(&run_lock);
     pthread_create(&pd, NULL, detect_and_control, NULL);     
     
-    // 命令：
-    //      c:标定
-    //      s:启动检测
-    //      S:停止检测
-    //      l:点击左键
-    //      r:点击右键
-    while (read(fd, buf, 1) > 0) {
-        if (buf[0] == 'c') {
-            location.calibrate(); 
-        } else if(buf[0] == 's') {
-            pthread_mutex_unlock(&run_lock);
-        } else if (buf[0] == 'S') {
-            pthread_mutex_lock(&run_lock);
-        } else if (buf[0] == 'l') {
-            mouse_control.clickLeft();
-        } else if (buf[0] == 'r') {
-            mouse_control.clickRight();
-        } else {
+    // 运行
+    while (true) {
+        auto command = comm.read_command();
+
+        if (command == lasermouse::CALIBRATE) 
+            location.calibrate();
+        else if (command == lasermouse::START) {
+            if (!is_run) {
+                std::cout << "开始运行" << std::endl;
+                pthread_mutex_unlock(&run_lock);
+            }
+            is_run = true;
         }
-        printf("command:\n"
-                "\rc:标定\n"
-                "\rs:开始检测\n"
-                "\rS:停止检测\n"
-                "\rl:点击左键\n"
-                "\rr:点击右键\n");
+        else if (command == lasermouse::STOP) {
+            if (is_run) {
+                std::cout << "停止运行" << std::endl;
+                pthread_mutex_lock(&run_lock);
+            }
+            is_run = false;
+        }
+        else if (command == lasermouse::CLICK_LEFT) {}
+        else if (command == lasermouse::CLICK_RIGHT) {}
     }
 }
 
