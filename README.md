@@ -30,17 +30,18 @@ ps:如果只是测试其控制鼠标的基本功能，则只需要一个激光�
     $ git clone https://github.com/csfenghan/laserMouse.git
     $ cd laserMouse
 
-然后将接入摄像头，使摄像头可以拍摄到投影仪画面（显示器）的全貌，曝光清晰
+然后将接入摄像头，使摄像头可以拍摄到投影仪画面（显示器）的全貌，并且曝光清晰
+
 实现分为C++和Python两个版本，Python为实验版本，C++为最终版本
 
 ### C++
-C++版本实现了鼠标控制的全部功能，依赖OpenCV和X11实现，进入目录后编译完成后运行即可
+C++版本实现了鼠标控制的全部功能，依赖OpenCV和X11实现，进入目录后编译完成后运行即可。（使用前需根据自己的硬件配置修改config.json文件中的摄像头和显示器的配置）
 
     $ cd cpp
     $ mkdir build && cd build
     $ cmake ..
     $ make
-    $ ./laserMouse
+    $ ./laserMouse ../config.json
 运行后，使用激光笔照射屏幕，鼠标可以准确的跟随激光笔移动。如果没有遥控器但想要模仿鼠标的行为，可以使用键盘模仿来自遥控器的信号（具体用法程序运行后有相应的help提示）
 
 ### Python
