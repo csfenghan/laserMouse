@@ -10,18 +10,20 @@
 lasermouse::Location location;          // 激光点定位
 lasermouse::MouseControl mouse_control; // 鼠标控制
 
-pthread_mutex_t run_lock;               // 通过这个互斥量控制检测线程
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+int wait = 1;
+pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+
 void *detect_and_control(void *);
 
 int main(int argc, char **argv) {
     pthread_t pd;
-    bool is_run = false;
 
     if (argc != 2) {
         fprintf(stderr, "usage: %s <config.json>", argv[0]);
         exit(0);
     }
-    // 初始化
+    // 读取配置文件，初始化
     lasermouse::Config config;      // 读取配置文件
     lasermouse::Communication comm; // 读取命令
 
@@ -32,7 +34,6 @@ int main(int argc, char **argv) {
     comm.init();
 
     // 初始化时持有锁，即默认检测线程阻塞
-    pthread_mutex_lock(&run_lock);
     pthread_create(&pd, NULL, detect_and_control, NULL);     
     
     // 运行
@@ -42,18 +43,24 @@ int main(int argc, char **argv) {
         if (command == lasermouse::CALIBRATE) 
             location.calibrate();
         else if (command == lasermouse::START) {
-            if (!is_run) {
-                std::cout << "开始运行" << std::endl;
-                pthread_mutex_unlock(&run_lock);
+            pthread_mutex_lock(&lock);
+            if (wait) {
+                wait = 0;
+                pthread_cond_signal(&cond);
             }
-            is_run = true;
+            pthread_mutex_unlock(&lock);
+
+            std::cout << "开始运行" << std::endl;
         }
         else if (command == lasermouse::STOP) {
-            if (is_run) {
-                std::cout << "停止运行" << std::endl;
-                pthread_mutex_lock(&run_lock);
+            pthread_mutex_lock(&lock);
+            if (!wait) {
+                wait = 1;
+                pthread_cond_signal(&cond);
             }
-            is_run = false;
+            pthread_mutex_unlock(&lock);
+
+            std::cout << "停止运行" << std::endl;
         }
         else if (command == lasermouse::CLICK_LEFT) {}
         else if (command == lasermouse::CLICK_RIGHT) {}
@@ -67,8 +74,10 @@ void *detect_and_control(void *arg) {
 
     while (true) {
         // 运行前检查是否可以获取锁，如果可以，说明当前可以运行；否则阻塞休眠
-        pthread_mutex_lock(&run_lock);
-        pthread_mutex_unlock(&run_lock);
+        pthread_mutex_lock(&lock);
+        while (wait)
+            pthread_cond_wait(&cond, &lock);
+        pthread_mutex_unlock(&lock);
 
         if (location.position(x, y)) 
             mouse_control.moveTo(x, y);
